@@ -5,7 +5,7 @@ public class Account
     public string FirstName { get; private set; }
     public string LastName { get; private set; }
 
-    private string Password;
+    public string Password { get; private set; }
     public string Email { get; private set; }
 
     public readonly DateTime CreatedTime;

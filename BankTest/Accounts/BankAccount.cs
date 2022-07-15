@@ -1,8 +1,7 @@
 ﻿namespace BankTest;
 public class BankAccount : Account
 {
-    // CHANGE !!!!!!!!!!!!!!!!!!!!!!!!!!
-    public decimal Balance { get; set; }
+    public decimal Balance { get; private set; }
     public List<HistoryNode> History { get; private set; }
     public BankAccount(string name, string lastName, string passowrd, string email) : base(name, lastName, passowrd, email)
     {
@@ -10,7 +9,7 @@ public class BankAccount : Account
         History = new List<HistoryNode>();
     }
 
-    public void SetTransfer(BankAccount receiver, decimal value, string? description)
+    public void SetTransfer(BankAccount receiver, decimal value, string? description = null)
     {
         if (receiver == null) throw new InvalidDataException("receiver is invalid");
         if (receiver.IsValid() == false) throw new InvalidDataException("receiver is invalid");
