@@ -36,6 +36,11 @@ public static class Menu
         Console.WriteLine("3. E-mail");
     }
 
+    public static void WrongNumber()
+    {
+        Console.WriteLine("Wrong number");
+    }
+
 
 }
 

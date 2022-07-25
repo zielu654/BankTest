@@ -20,15 +20,9 @@ public static class ManagerActions
                 if (account.IsAdmin == false)
                 {
                     Console.WriteLine("Can not access. You are not admin");
-                    return;
                 }
-                Console.WriteLine("---------------Accounts---------------");
-
-                foreach (Account ac in AccountActions.accounts)
-                {
-                    if (ac is Manager) ac.Show();
-                    else ac.Show();
-                }
+                else
+                    ShowAll();
                 break;
             // Find
             case 3:
@@ -53,10 +47,21 @@ public static class ManagerActions
                 goto case 6;
             // wrong
             default:
-                Console.WriteLine("Wrong number");
+                Menu.WrongNumber();
                 break;
         }
 
+    }
+
+    private static void ShowAll()
+    {
+        Console.WriteLine("---------------Accounts---------------");
+
+        foreach (Account ac in AccountActions.accounts)
+        {
+            if (ac is Manager) ac.Show();
+            else ac.Show();
+        }
     }
 
     static void Find()
@@ -67,16 +72,20 @@ public static class ManagerActions
         {
             // id
             case 1:
-                Console.Write("Enter id: ");
-                try
+                bool isSuccess = false;
+                do
                 {
-                    Guid id = Guid.Parse(Console.ReadLine());
-                    AccountActions.accounts.Find(x => x.Id == id).Show();
-                }
-                catch (ArgumentNullException)
-                {
-                    Console.WriteLine("No matches");
-                }
+                    Console.Write("Enter id: ");
+                    Guid id;
+                    if (Guid.TryParse(Console.ReadLine(), out id))
+                    {
+                        Find(x => x.Id == id);
+                        isSuccess = true;
+                    }
+                    else
+                        Console.WriteLine("Wrong id");
+                } while (isSuccess == false);
+                
                 break;
             // name
             case 2:
@@ -97,31 +106,27 @@ public static class ManagerActions
             case 3:
                 Console.Write("Enter e-mail: ");
                 string email = Console.ReadLine();
-                try
-                {
-                    AccountActions.accounts.Find(x => x.Email == email).Show();
-                }
-                catch (ArgumentNullException)
-                {
-                    Console.WriteLine("No matches");
-                }
+                Find(x => x.Email == email);
                 break;
             default:
+                Console.WriteLine("");
                 break;
         }
     }
     static void Edit()
     {
-        Account editetAccount;
+        Account? editetAccount;
         Manager account = AccountActions.loggedAccount as Manager;
         Console.Write("Eneter id: ");
 
         // get account to edit
         try
         {
-
             Guid id = Guid.Parse(Console.ReadLine());
             editetAccount = AccountActions.accounts.Find(x => x.Id == id);
+            if (account == null)
+                throw new Exception("Account not found");
+
             editetAccount.IsValid();
         }
         catch (Exception e)
@@ -138,35 +143,32 @@ public static class ManagerActions
             Console.WriteLine("access deny");
             return;
         }
+
+        EditingAccount(editetAccount, account);
+    }
+
+    private static void EditingAccount(Account editetAccount, Manager account)
+    {
         // editing
         Console.WriteLine("If not change empty");
-        Console.Write("First name: ");
-        string? firstName = Console.ReadLine();
-        if (firstName == String.Empty) firstName = null;
+        // get first and last name (if is empty set as null)
+        string? firstName = GetLineOrNull("First name: ");
+        string? lastName = GetLineOrNull("Last name: ");
 
-        Console.Write("Last name: ");
-        string? lastName = Console.ReadLine();
-        if (lastName == String.Empty) lastName = null;
+        // getting email and checking if is correct
         string? email;
         do
         {
-            Console.Write("E-mail: ");
-            email = Console.ReadLine();
-            if (email == String.Empty)
-            {
-                email = null;
+            email = GetLineOrNull("E-mail: ");
+            if (email == null)
                 break;
-            }
-
         } while (CommonActions.EmailCorrect(email, editetAccount));
 
-
         // enter new password and clear line
-        Console.Write("Password: ");
-        string? password = Console.ReadLine();
-        if (password == String.Empty) password = null;
+        string? password = GetLineOrNull("Password: ");
         CommonActions.ClearCurrentConsoleLine();
 
+        // if account is admin you can edit balance
         if (account.IsAdmin && editetAccount is BankAccount)
         {
             Console.Write("Add to balance: ");
@@ -174,10 +176,21 @@ public static class ManagerActions
             decimal.TryParse(Console.ReadLine(), out tempBalance);
             decimal? addToBalance = tempBalance == 0 ? null : tempBalance;
             (editetAccount as BankAccount).Edit(firstName, lastName, password, email, addToBalance);
-            return;
         }
-        editetAccount.Edit(firstName, lastName, password, email);
+        else
+            editetAccount.Edit(firstName, lastName, password, email);
     }
+
+    static string? GetLineOrNull(string? message = null)
+    {
+        // if message is null don't show
+        if (message != null) Console.Write(message);
+        // get string and if not null return it but if is null return null
+        string? input = Console.ReadLine();
+        if (input == String.Empty) return null;
+        return input;
+    }
+
     static void Add()
     {
         Manager account = AccountActions.loggedAccount as Manager;
@@ -199,12 +212,24 @@ public static class ManagerActions
         CommonActions.ClearCurrentConsoleLine();
         try
         {
-            AccountActions.accounts.Add(new Account(firstName, lastName, password, email));
+            AccountActions.accounts.Add(new BankAccount(firstName, lastName, password, email));
 
         }
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
+        }
+    }
+
+    static void Find(Predicate<Account> match)
+    {
+        try
+        {
+            AccountActions.accounts.Find(match).Show();
+        }
+        catch (ArgumentNullException)
+        {
+            Console.WriteLine("No matches");
         }
     }
 }

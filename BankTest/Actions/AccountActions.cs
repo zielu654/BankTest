@@ -4,7 +4,7 @@ namespace BankTest;
 public static class AccountActions
 {
     // list of accounts 
-    public static List<Account> accounts = new List<Account>();
+    public static List<Account> accounts = new();
     // now logged account
     public static Account? loggedAccount = null;
     public static void Main()
@@ -26,93 +26,62 @@ public static class AccountActions
             ManagerActions.Main();
             return;
         }
-
-        // display menu
-        Menu.Account();
-        BankAccount account = loggedAccount as BankAccount;
+        // if bank account go to bank account actions
+        else if (loggedAccount is BankAccount)
+        {
+            BankAccountActions.Main();
+            return;
+        }
+    }
+    public static void Start(ref bool canContinue)
+    {
+        // show main menu 
+        Menu.Main();
         int choice = CommonActions.GetNumber();
 
         switch (choice)
         {
-            // info
+            // Login
             case 1:
-                account.Show();
+                Login();
                 break;
-            // transfer
+            // Clear
             case 2:
-                Transfer(account);
-                break;
-            // history
-            case 3:
-                if (account.History.Count == 0)
-                {
-                    Console.WriteLine("History empty");
-                    return;
-                }
-
-                Console.WriteLine("---------------History---------------");
-
-                foreach (HistoryNode node in account.History)
-                {
-                    node.Show();
-                }
-                break;
-            // clan
-            case 4:
                 Console.Clear();
                 break;
-            // logout
-            case 5:
-                loggedAccount.LogOut();
-                loggedAccount = null;
-                goto case 4;
-            // wrong
-            default:
-                Console.WriteLine("Wrong number");
+            // Exit
+            case 3:
+                canContinue = false;
                 break;
+            default:
+                Menu.WrongNumber();
+                break;
+
         }
     }
-    static void Transfer(BankAccount account)
+    public static void Login()
     {
-        // get info about receiver and transfer
-        Console.Write("To id: ");
-        string id = Console.ReadLine();
-        Console.Write("Description: ");
-        string description = Console.ReadLine();
-        Console.Write("Value: ");
-        decimal value;
-        // try to do transfer (if fail show error)
-        try
+        // enter login data
+        Console.Write("E-mail: ");
+        string email = Console.ReadLine();
+        Console.Write("Password: ");
+        string password = Console.ReadLine();
+
+        // clear line with password
+        CommonActions.ClearCurrentConsoleLine();
+
+        // search for matching account
+        foreach (Account account in AccountActions.accounts)
         {
-            value = Convert.ToDecimal(Console.ReadLine());
-            // check for account (by id)
-            BankAccount reciver = accounts.First(a => a.Id.Equals(Guid.Parse(id)) && a is BankAccount) as BankAccount;
-            account.IsValid();
-            // show warning about negative balance
-            if (CheckIfBalanceGreaterTheZero(account, value)) return;
-            account.SetTransfer(reciver, value, description);
+            if (account.Email == email)
+                if (account.LogIn(password))
+                {
+                    AccountActions.loggedAccount = account;
+                    Console.WriteLine($"Hello {AccountActions.loggedAccount.FirstName} {AccountActions.loggedAccount.LastName}");
+                    return;
+                }
         }
-        // to do !!!!
-        catch (Exception)
-        {
-            Console.WriteLine("Fail");
-        }
+        Console.WriteLine("Login failed");
     }
-    static bool CheckIfBalanceGreaterTheZero(BankAccount account, decimal value)
-    {
-        if (account.Balance - value < 0)
-        {
-            // confirm action
-            Console.WriteLine("You don't have enough money. Do you want to continue? (y/n)");
-            // if something else then 'y' don't do transfer
-            if (Console.ReadKey().KeyChar != 'y')
-            {
-                Console.WriteLine("Transfer ender");
-                return true;
-            }
-        }
-        return false;
-    }
-    
 }
 

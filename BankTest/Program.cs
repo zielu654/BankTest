@@ -16,6 +16,6 @@ AccountActions.accounts[1].Show();
 while (canContinue)
 {
     // check if logged
-    if (AccountActions.loggedAccount == null) CommonActions.Start(ref canContinue);
+    if (AccountActions.loggedAccount == null) AccountActions.Start(ref canContinue);
     else AccountActions.Main();
 }

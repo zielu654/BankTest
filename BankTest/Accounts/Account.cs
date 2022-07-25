@@ -1,5 +1,5 @@
 ﻿namespace BankTest;
-public class Account
+public abstract class Account
 {
     public Guid Id { get; protected set; }
     public string FirstName { get; private set; }
@@ -71,6 +71,7 @@ public class Account
 
     public virtual void Show()
     {
+        // showing all infos
         Console.WriteLine("Id: " + Id);
         Console.WriteLine("Name: " + FirstName);
         Console.WriteLine("Last name: " + LastName);
@@ -81,6 +82,7 @@ public class Account
 
     public virtual void Edit(string? firstName, string? lastName, string? password, string? email)
     {
+        // if something is null don't edit
         if (firstName != null) FirstName = firstName;
         if (lastName != null) LastName = lastName;
         if (password != null) Password = Hashing.GetHashString(password);

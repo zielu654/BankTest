@@ -9,6 +9,7 @@ public class Manager : Account
 
     public override void Show()
     {
+        // if is manager show it
         if (IsAdmin) Console.WriteLine("Admin");
         else Console.WriteLine("Manager");
 

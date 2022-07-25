@@ -20,6 +20,7 @@ public class HistoryNode
 
     public void Show()
     {
+        // showing info about transaction
         Console.WriteLine(Description);
         Console.WriteLine(Value + "$");
         Console.WriteLine("From:");
