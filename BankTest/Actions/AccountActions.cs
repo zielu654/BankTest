@@ -62,13 +62,9 @@ public static class AccountActions
     public static void Login()
     {
         // enter login data
-        Console.Write("E-mail: ");
-        string email = Console.ReadLine();
-        Console.Write("Password: ");
-        string password = Console.ReadLine();
+        string email = GetPropertiesOfAccount.GetEmail();
+        string password = GetPropertiesOfAccount.GetPasssword();
 
-        // clear line with password
-        CommonActions.ClearCurrentConsoleLine();
 
         // search for matching account
         foreach (Account account in AccountActions.accounts)

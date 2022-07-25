@@ -1,7 +1,6 @@
 ﻿namespace BankTest.Actions;
 public static class ManagerActions
 {
-
     public static void Main()
     {
         Menu.Manager();
@@ -52,8 +51,7 @@ public static class ManagerActions
         }
 
     }
-
-    private static void ShowAll()
+    static void ShowAll()
     {
         Console.WriteLine("---------------Accounts---------------");
 
@@ -63,7 +61,6 @@ public static class ManagerActions
             else ac.Show();
         }
     }
-
     static void Find()
     {
         Menu.ManagerFind();
@@ -89,10 +86,8 @@ public static class ManagerActions
                 break;
             // name
             case 2:
-                Console.Write("Enter first name: ");
-                string first = Console.ReadLine();
-                Console.Write("Enter last name: ");
-                string last = Console.ReadLine();
+                string first = GetPropertiesOfAccount.GetFirstName();
+                string last = GetPropertiesOfAccount.GetLastName();
                 try
                 {
                     AccountActions.accounts.FindAll(x => x.FirstName == first && x.LastName == last).ForEach(a => a.Show());
@@ -104,8 +99,7 @@ public static class ManagerActions
                 break;
             // email
             case 3:
-                Console.Write("Enter e-mail: ");
-                string email = Console.ReadLine();
+                string email = GetPropertiesOfAccount.GetEmail();
                 Find(x => x.Email == email);
                 break;
             default:
@@ -146,26 +140,50 @@ public static class ManagerActions
 
         EditingAccount(editetAccount, account);
     }
+    static void Add()
+    {
+        Manager account = AccountActions.loggedAccount as Manager;
+        string firstName = GetPropertiesOfAccount.GetFirstName();
+        string lastName = GetPropertiesOfAccount.GetLastName();
 
-    private static void EditingAccount(Account editetAccount, Manager account)
+        string? email;
+        do
+        {
+            Console.Write("E-mail: ");
+            email = Console.ReadLine();
+
+        } while (CommonActions.EmailCorrect(email));
+
+        string password = GetPropertiesOfAccount.GetPasssword();
+        try
+        {
+            AccountActions.accounts.Add(new BankAccount(firstName, lastName, password, email));
+
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+    }
+    static void EditingAccount(Account editetAccount, Manager account)
     {
         // editing
         Console.WriteLine("If not change empty");
         // get first and last name (if is empty set as null)
-        string? firstName = GetLineOrNull("First name: ");
-        string? lastName = GetLineOrNull("Last name: ");
+        string? firstName = GetPropertiesOfAccount.GetLineOrNull("First name: ");
+        string? lastName = GetPropertiesOfAccount.GetLineOrNull("Last name: ");
 
         // getting email and checking if is correct
         string? email;
         do
         {
-            email = GetLineOrNull("E-mail: ");
+            email = GetPropertiesOfAccount.GetLineOrNull("E-mail: ");
             if (email == null)
                 break;
         } while (CommonActions.EmailCorrect(email, editetAccount));
 
         // enter new password and clear line
-        string? password = GetLineOrNull("Password: ");
+        string? password = GetPropertiesOfAccount.GetLineOrNull("Password: ");
         CommonActions.ClearCurrentConsoleLine();
 
         // if account is admin you can edit balance
@@ -180,47 +198,7 @@ public static class ManagerActions
         else
             editetAccount.Edit(firstName, lastName, password, email);
     }
-
-    static string? GetLineOrNull(string? message = null)
-    {
-        // if message is null don't show
-        if (message != null) Console.Write(message);
-        // get string and if not null return it but if is null return null
-        string? input = Console.ReadLine();
-        if (input == String.Empty) return null;
-        return input;
-    }
-
-    static void Add()
-    {
-        Manager account = AccountActions.loggedAccount as Manager;
-        Console.Write("First name: ");
-        string firstName = Console.ReadLine();
-        Console.Write("First name: ");
-        string lastName = Console.ReadLine();
-
-        string? email;
-        do
-        {
-            Console.Write("E-mail: ");
-            email = Console.ReadLine();
-
-        } while (CommonActions.EmailCorrect(email));
-
-        Console.Write("Password: ");
-        string password = Console.ReadLine();
-        CommonActions.ClearCurrentConsoleLine();
-        try
-        {
-            AccountActions.accounts.Add(new BankAccount(firstName, lastName, password, email));
-
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-        }
-    }
-
+    
     static void Find(Predicate<Account> match)
     {
         try
@@ -233,4 +211,3 @@ public static class ManagerActions
         }
     }
 }
-
